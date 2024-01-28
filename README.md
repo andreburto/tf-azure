@@ -20,3 +20,7 @@ This site configuration is based off the following tutorials:
 3. Modify the `index.html` and `header.png` files as desired.
 4. Once set, use `terraform plan` and `terraform apply -auto-approve` to setup the site.
 5. Use the output URL to visit your new site.
+
+## Link
+
+Check it out: [https://uajpozif.z13.web.core.windows.net/](https://uajpozif.z13.web.core.windows.net/)
