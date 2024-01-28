@@ -23,15 +23,23 @@ provider "azurerm" {
   tenant_id       = var.tenant_id
 }
 
-data "azurerm_client_config" "current" {}
+locals {
+
+  index_file = "index.html"
+
+  static_files = {
+    "header.png" = "image/png",
+    "${local.index_file}" = "text/html",
+  }
+}
 
 # Generate random resource group name
 resource "random_pet" "rg_name" {
-  prefix = var.resource_group_name_prefix
+  prefix = var.rg_name_prefix
 }
 
 resource "azurerm_resource_group" "rg" {
-  location = var.resource_group_location
+  location = var.rg_location
   name     = random_pet.rg_name.id
 }
 
@@ -55,24 +63,16 @@ resource "azurerm_storage_account" "storage_account" {
   account_kind             = "StorageV2"
 
   static_website {
-    index_document = "index.html"
+    index_document = local.index_file
   }
 }
 
-resource "azurerm_storage_blob" "index" {
-  name                   = "index.html"
+resource "azurerm_storage_blob" "files" {
+  for_each               = local.static_files
+  name                   = each.key
   storage_account_name   = azurerm_storage_account.storage_account.name
   storage_container_name = "$web"
   type                   = "Block"
-  content_type           = "text/html"
-  source                 = "${path.module}/files/index.html"
-}
-
-resource "azurerm_storage_blob" "header" {
-  name                   = "header.png"
-  storage_account_name   = azurerm_storage_account.storage_account.name
-  storage_container_name = "$web"
-  type                   = "Block"
-  content_type           = "image/png"
-  source                 = "${path.module}/files/header.png"
+  content_type           = each.value
+  source                 = "${path.module}/files/${each.key}"
 }
